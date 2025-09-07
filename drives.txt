@@ -1,0 +1,30 @@
+# ==============================================================================
+#  macOS-Drive-Mounter Drive Configuration
+#  Copyright (c) 2025 Pangeran Wiguan
+#  Licensed under the MIT License. See LICENSE file for details.
+#  Project URL: https://pangeranwiguan.com/macos-drive-mounter
+# ==============================================================================
+
+#
+# INSTRUCTIONS:
+#
+# 1. Add each network drive you want to mount on a new line.
+# 2. Use the full SMB URL format: smb://user:password@server/share
+#
+#    - user:       Your username for the network share.
+#    - password:   Your password for the share. Special characters in passwords
+#                  may need to be URL-encoded (e.g., '#' becomes %23).
+#    - server:     The server's IP address (e.g., 192.168.1.100) or its
+#                  hostname (e.g., MyNAS).
+#    - share:      The name of the shared folder.
+#
+# 3. Lines starting with a hash (#) are ignored.
+#
+# WARNING: This file stores your passwords in plain text. Ensure this file is
+# kept in a secure location and has appropriate file permissions.
+#
+# --- EXAMPLES (replace these with your actual drives) ---
+
+smb://myuser:MyPassword123@192.168.1.100/Documents
+smb://pangeran:S3curePa$$w0rd@MyNAS/Media
+smb://admin:admin@router-storage/Backups
