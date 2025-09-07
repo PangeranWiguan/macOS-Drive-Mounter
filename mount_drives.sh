@@ -48,16 +48,16 @@ for drive_url in "${drives_to_process[@]}"; do
     # Get the URL-encoded share name from the end of the URL.
     encoded_share_name="${drive_url##*/}"
     
-    # **FINAL FIX**: Decode the share name for the local filesystem path.
-    # This converts things like '%20' into a real space for the folder name.
-    decoded_share_name=$(printf '%b' "${encoded_share_name//%/\\x}")
+    # **FINAL, ROBUST FIX**: Use Python to reliably decode the URL component.
+    # This correctly handles '%20', '%40', and other special characters.
+    decoded_share_name=$(python3 -c "import urllib.parse; print(urllib.parse.unquote('${encoded_share_name}'))")
     mount_point="/Volumes/${decoded_share_name}"
 
-    # Check if the drive is already mounted using the decoded name.
+    # Check if the drive is already mounted using the properly decoded name.
     if mount | grep -q "on ${mount_point}"; then
         continue
     else
-        # Attempt to mount. The source URL is still encoded, but the destination is decoded.
+        # Attempt to mount. The source URL is encoded, but the destination is now correctly decoded.
         if ! mount -t smbfs -o "timeout=5" "$drive_url" "$mount_point"; then
             current_failures+=("$drive_url")
         fi
@@ -71,8 +71,7 @@ if [ ${#current_failures[@]} -eq 0 ]; then
 else
     printf "%s\n" "${current_failures[@]}" > "$FAILED_DRIVES_FILE"
     if ! [ -f "$NOTIFICATION_COOLDOWN_FILE" ] || [ $(find "$NOTIFICATION_COOLDOWN_FILE" -mmin +$(($NOTIFICATION_COOLDOWN_SECONDS/60)) | wc -l) -gt 0 ]; then
-        failed_shares=$(printf ", %s" "${current_failures[@]}")
-        failed_shares=${failed_shares:2}
+        failed_shares=$(python3 -c "import urllib.parse; print(urllib.parse.unquote('${current_failures[*]}'))" | sed 's/ /, /g')
         
         osascript -e "display notification \"The script will keep retrying in the background.\" with title \"Drive Mounter Failed\" subtitle \"Could not connect to: ${failed_shares}\""
         
