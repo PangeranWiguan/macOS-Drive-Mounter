@@ -45,20 +45,15 @@ for drive_url in "${drives_to_process[@]}"; do
         continue
     fi
 
-    # Get the URL-encoded share name from the end of the URL.
     encoded_share_name="${drive_url##*/}"
-    
-    # **FINAL, ROBUST FIX**: Use Python to reliably decode the URL component.
-    # This correctly handles '%20', '%40', and other special characters.
     decoded_share_name=$(python3 -c "import urllib.parse; print(urllib.parse.unquote('${encoded_share_name}'))")
     mount_point="/Volumes/${decoded_share_name}"
 
-    # Check if the drive is already mounted using the properly decoded name.
     if mount | grep -q "on ${mount_point}"; then
         continue
     else
-        # Attempt to mount. The source URL is encoded, but the destination is now correctly decoded.
-        if ! mount -t smbfs -o "timeout=5" "$drive_url" "$mount_point"; then
+        # **FINAL FIX**: Removed the '-o "timeout=5"' option which was causing the failure.
+        if ! mount -t smbfs "$drive_url" "$mount_point"; then
             current_failures+=("$drive_url")
         fi
     fi
