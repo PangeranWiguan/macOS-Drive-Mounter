@@ -28,14 +28,12 @@ trap 'rm -f "$LOCK_FILE"' EXIT
 
 # 1. Determine which drives to process.
 drives_to_process=()
-target_file="$DRIVES_FILE" # Default to the main list
+target_file="$DRIVES_FILE"
 
 if [ -s "$FAILED_DRIVES_FILE" ]; then
-    # If a failure list exists, use it instead.
     target_file="$FAILED_DRIVES_FILE"
 fi
 
-# **FIXED CODE**: Use a portable 'while read' loop instead of 'mapfile'.
 while IFS= read -r line || [[ -n "$line" ]]; do
     drives_to_process+=("$line")
 done < "$target_file"
@@ -47,13 +45,16 @@ for drive_url in "${drives_to_process[@]}"; do
         continue
     fi
 
-    share_name=$(basename "$drive_url")
+    # **FIXED**: More robust way to get the share name from the URL.
+    share_name="${drive_url##*/}"
     mount_point="/Volumes/${share_name}"
 
     if mount | grep -q "on ${mount_point}"; then
         continue
     else
-        mkdir -p "${mount_point}"
+        # **REMOVED**: Do not manually create the directory in /Volumes.
+        # The 'mount' command will do this automatically if it succeeds.
+        
         if ! mount -t smbfs -o "timeout=5" "$drive_url" "$mount_point"; then
             current_failures+=("$drive_url")
         fi
