@@ -45,16 +45,19 @@ for drive_url in "${drives_to_process[@]}"; do
         continue
     fi
 
-    # **FIXED**: More robust way to get the share name from the URL.
-    share_name="${drive_url##*/}"
-    mount_point="/Volumes/${share_name}"
+    # Get the URL-encoded share name from the end of the URL.
+    encoded_share_name="${drive_url##*/}"
+    
+    # **FINAL FIX**: Decode the share name for the local filesystem path.
+    # This converts things like '%20' into a real space for the folder name.
+    decoded_share_name=$(printf '%b' "${encoded_share_name//%/\\x}")
+    mount_point="/Volumes/${decoded_share_name}"
 
+    # Check if the drive is already mounted using the decoded name.
     if mount | grep -q "on ${mount_point}"; then
         continue
     else
-        # **REMOVED**: Do not manually create the directory in /Volumes.
-        # The 'mount' command will do this automatically if it succeeds.
-        
+        # Attempt to mount. The source URL is still encoded, but the destination is decoded.
         if ! mount -t smbfs -o "timeout=5" "$drive_url" "$mount_point"; then
             current_failures+=("$drive_url")
         fi
