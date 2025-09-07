@@ -8,23 +8,40 @@
 #
 # INSTRUCTIONS:
 #
-# 1. Add each network drive you want to mount on a new line.
-# 2. Use the full SMB URL format: smb://user:password@server/share
+# 1. Add each drive on a new line using the 4-column format below.
+# 2. Use spaces or tabs to separate the four columns.
+# 3. If your Share Name or Password contains spaces or special characters
+#    (like @, !, $, #), you MUST enclose it in "double quotes".
 #
-#    - user:       Your username for the network share.
-#    - password:   Your password for the share. Special characters in passwords
-#                  may need to be URL-encoded (e.g., '#' becomes %23).
-#    - server:     The server's IP address (e.g., 192.168.1.100) or its
-#                  hostname (e.g., MyNAS).
-#    - share:      The name of the shared folder.
+# --- FORMAT ---
 #
-# 3. Lines starting with a hash (#) are ignored.
+# server_address    "Share Name"    username    "Password"
 #
-# WARNING: This file stores your passwords in plain text. Ensure this file is
-# kept in a secure location and has appropriate file permissions.
+# --- COLUMN DETAILS ---
+#
+#    - server_address: The server's IP address (e.g., 192.168.1.100) or its
+#                      local hostname (e.g., MyNAS.local).
+#
+#    - "Share Name":   The name of the shared folder. Use quotes if it
+#                      contains spaces or special characters.
+#
+#    - username:       Your username for the network share.
+#
+#    - "Password":     Your password for the share. Use quotes if it
+#                      contains spaces or special characters.
+#
+# 4. Lines starting with a hash (#) are ignored.
 #
 # --- EXAMPLES (replace these with your actual drives) ---
 
-smb://myuser:MyPassword123@192.168.1.100/Documents
-smb://pangeran:S3curePa$$w0rd@MyNAS/Media
-smb://admin:admin@router-storage/Backups
+# Example 1: Simple share on a NAS using its hostname
+#MyNAS.local             Public          guest       ""
+
+# Example 2: Share with a space in its name, using an IP address
+#192.168.1.50            "My Documents"  myuser      "SimplePass123"
+
+# Example 3: Share with a special character (@) in its name
+#fileserver.local        "Scans@HP"      scanner     "Scan-Pass!"
+
+# Example 4: Password with special characters that requires quotes
+#10.0.0.10               Backups         admin       "My$uperP@ssw0rd!"
